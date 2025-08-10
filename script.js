@@ -14,32 +14,44 @@ document.getElementById('confetti-btn').addEventListener('click', function() {
     }
 });
 
-document.getElementById('download-pdf').addEventListener('click', async function() {
-    try {
-        const pdfUrl = 'felicitacion.pdf';
-        const response = await fetch(pdfUrl);
+document.getElementById('download-pdf').addEventListener('click', function() {
+    // Ruta al archivo PDF (asegúrate que es correcta)
+    const pdfUrl = 'felicitacion.pdf';
 
-        if (!response.ok) throw new Error('El archivo no pudo ser cargado');
+    // Solución universal para todos los navegadores
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', pdfUrl, true);
+    xhr.responseType = 'blob';
 
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
+    xhr.onload = function() {
+        if (this.status === 200) {
+            const blob = new Blob([this.response], {type: 'application/pdf'});
+            const downloadUrl = URL.createObjectURL(blob);
 
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = 'FelizCumpleanos.pdf';
-        link.style.display = 'none';
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = 'FelizCumpleanos.pdf'; // Nombre del archivo a descargar
+            document.body.appendChild(a);
+            a.click();
 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            // Limpieza
+            setTimeout(function() {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+            }, 100);
+        } else {
+            // Manejo de errores
+            console.error('No se pudo cargar el archivo PDF');
+            alert('No se pudo cargar el archivo. Por favor intenta más tarde.');
+        }
+    };
 
-        // Liberar memoria
-        window.URL.revokeObjectURL(blobUrl);
+    xhr.onerror = function() {
+        console.error('Error de red al intentar descargar el PDF');
+        alert('Ocurrió un error de conexión.');
+    };
 
-    } catch (error) {
-        console.error('Error al descargar:', error);
-        alert('Ocurrió un error al descargar el PDF. Por favor intenta nuevamente.');
-    }
+    xhr.send();
 });
 
 function createBalloon() {
@@ -103,3 +115,4 @@ function getRandomColor() {
     return colors[Math.floor(Math.random() * colors.length)];
 
 }
+
