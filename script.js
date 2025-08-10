@@ -14,6 +14,34 @@ document.getElementById('confetti-btn').addEventListener('click', function() {
     }
 });
 
+document.getElementById('download-pdf').addEventListener('click', async function() {
+    try {
+        const pdfUrl = 'felicitacion.pdf';
+        const response = await fetch(pdfUrl);
+
+        if (!response.ok) throw new Error('El archivo no pudo ser cargado');
+
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'FelizCumpleanos.pdf';
+        link.style.display = 'none';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Liberar memoria
+        window.URL.revokeObjectURL(blobUrl);
+
+    } catch (error) {
+        console.error('Error al descargar:', error);
+        alert('Ocurrió un error al descargar el PDF. Por favor intenta nuevamente.');
+    }
+});
+
 function createBalloon() {
     const balloon = document.createElement('div');
     balloon.innerHTML = '🎈';
@@ -73,4 +101,5 @@ function createConfetti() {
 function getRandomColor() {
     const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#ff9ff3', '#feca57'];
     return colors[Math.floor(Math.random() * colors.length)];
+
 }
